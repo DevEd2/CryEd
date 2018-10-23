@@ -168,6 +168,8 @@ CryEdit_CryBase		ds	1
 CryEdit_CryPitch	ds	2
 CryEdit_CryLength	ds	2
 
+SelectedSaveSlot	ds	1
+
 Title_LetterPos		ds	10
 Title_StringBuffer	ds	10
 Title_StringSet		ds	1

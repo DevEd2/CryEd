@@ -1032,7 +1032,8 @@ InitLoadSaveScreen:
 	xor	a
 	ldh	[rLCDC],a
 	ld	[sys_MenuPos],a
-	ld	[sys_MenuMax],a
+	ld	a,[SelectedSaveSlot]
+	ld	[sys_MenuMax],a			; sys_MenuMax is repurposed as currently selected save slot
 	call	MapSetup_Sound_Off
 	; load font + graphics
 	CopyTileset1BPP	Font,0,98
@@ -1082,9 +1083,9 @@ LoadSaveScreenLoop:
 	jr	nz,.sub1
 .continue
 	ld	a,[sys_MenuMax]
+	ld	[SelectedSaveSlot],a
 	ld	hl,$9871
 	call	DrawHex
-	
 	halt
 	jr	LoadSaveScreenLoop
 
