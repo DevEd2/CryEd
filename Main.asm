@@ -435,18 +435,7 @@ CryEditorLoop::
 	ld	[wCryLength],a
 	ld	a,[hl+]
 	ld	[wCryLength+1],a
-	
-	ld a, [sys_CurrentROMBank]
-	push af
-	ld a, BANK(_PlayCry)
-	ld [sys_CurrentROMBank], a
-	ld [rROMB0], a
-
-	call _PlayCry
-
-	pop af
-	ld [sys_CurrentROMBank], a
-	ld [rROMB0], a
+	call	CryEd_PreviewCry
 	jr	.continue
 .editUp
 	ld	e,1
@@ -1061,18 +1050,20 @@ InitLoadSaveScreen:
 	ldh	[rLCDC],a
 	ld	a,IEF_VBLANK
 	ldh	[rIE],a
-	ei	
-;	ld	de,6	; SFX_MENU
-;	call	PlaySFX
+	ei
 	halt
 	
 LoadSaveScreenLoop:
+	call	UpdateSound
+	
 	ld	hl,sys_MenuMax
 	ld	a,[sys_btnPress]
 	bit	btnA,a
-	jr	nz,.selectSlot
+	jp	nz,.selectSlot
 	bit	btnB,a
 	jr	nz,.exit
+	bit	btnSelect,a
+	jr	nz,.previewCry
 	bit	btnUp,a
 	jr	nz,.add16
 	bit	btnDown,a
@@ -1089,6 +1080,38 @@ LoadSaveScreenLoop:
 	halt
 	jr	LoadSaveScreenLoop
 
+.previewCry
+	call	LoadSaveScreen_SRAMCheck
+	jr	c,.previewfail
+	ld	a,[sys_MenuMax]
+	call	LoadSaveScreen_GetPtr
+	ld	a,$a
+	ld	[rRAMG],a
+	push	hl
+	call	LoadSave_CheckIfCryExists
+	jp	nc,.crydoesntexist
+	pop	hl
+	ld	a,[hl+]
+	ld	d,0
+	ld	e,a
+	inc	hl
+	ld	a,[hl+]
+	ld	[wCryPitch],a
+	ld	a,[hl+]
+	ld	[wCryPitch+1],a
+	ld	a,[hl+]
+	ld	[wCryLength],a
+	ld	a,[hl+]
+	ld	[wCryLength+1],a
+	call	CryEd_PreviewCry
+	jr	.continue
+.previewfail
+	call	MapSetup_Sound_Off
+	ld	de,$19
+	call	PlaySFX
+	ld	hl,msg_previewfail
+	jp	.doprintmessage
+	
 .sub1
 	dec	[hl]
 	jr	.continue
@@ -1135,7 +1158,7 @@ LoadSaveScreenLoop:
 	jp	nz,.doSave
 	dec	a
 	jr	nz,.doLoad
-	jr	.continue
+	jp	.continue
 .doLoad
 	call	LoadSaveScreen_SRAMCheck
 	jr	c,.loadfail
@@ -1246,8 +1269,6 @@ LoadSaveScreenLoop:
 	cp	$ff
 	jr	z,.cancel
 	and	a
-	jr	nz,.cancel
-	dec	a
 	jr	nz,.crydoesntexist2
 	jr	.cancel
 .crydoesntexist2
@@ -1393,8 +1414,8 @@ LoadSaveScreenTilemap:
 	db	"    - CONTROLS -    "
 	db	"A          Load/save"
 	db	"B             Cancel"
+	db	"Select       Preview"
 	db	"D-pad         Select"
-	db	"                    "
 	db	"                    "
 	db	"                    "
 	db	"                    "
@@ -1413,8 +1434,9 @@ msg_loaded		db	" CRY LOADED         "
 msg_slotempty	db	" SLOT EMPTY         "
 msg_savefail	db	" SAVE FAILED!       "
 msg_loadfail	db	" LOAD FAILED!       "
+msg_previewfail	db	" PREVIEW FAILED!    "
 prompt_loadsave	db	" > Load      Save   "
-prompt_yesno	db	" > Yes       No     "
+prompt_yesno	db	" > No        Yes    "
 	
 ; INPUT: hl = string pointer, a = line no.
 LoadSaveScreen_PrintLine:
@@ -1443,6 +1465,18 @@ LoadSaveScreen_PrintLine:
 ; =============
 ; Misc routines
 ; =============
+
+CryEd_PreviewCry:
+	ld a, [sys_CurrentROMBank]
+	push af
+	ld a, BANK(_PlayCry)
+	ld [sys_CurrentROMBank], a
+	ld [rROMB0],a
+	call _PlayCry
+	pop af
+	ld [sys_CurrentROMBank], a
+	ld [rROMB0],a
+	ret
 
 ; Fill RAM with a value.
 ; INPUT:  a = value
