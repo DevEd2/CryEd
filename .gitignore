@@ -9,6 +9,11 @@
 *.sym
 *.obj
 
+# built ROMs
+*.gb
+*.gbc
+*.sav
+
 # from github/gitignore/blob/master/Global/Windows.gitignore
 # Windows image file caches
 Thumbs.db
@@ -24,3 +29,6 @@ $RECYCLE.BIN/
 *.lnk
 *.db
 *.bak
+
+# macOS junk
+.DS_Store
