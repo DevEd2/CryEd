@@ -635,7 +635,7 @@ wChannelsEnd::
 wMapMusic:: db ; c2c0
 
 wDontPlayMapMusicOnReload:: db
-wOptions	db
+wOptions::	db
 wMusicEnd::
 
 STEREO		equ	5
@@ -698,7 +698,7 @@ UpdateSound:: ; 3b6a
 
 _LoadMusicByte:: ; 3b86
 ; wCurMusicByte = [a:de]
-GLOBAL LoadMusicByte
+;GLOBAL LoadMusicByte
 
 	ld [sys_CurrentROMBank], a
 	ld [rROMB0], a
@@ -1041,9 +1041,6 @@ INCLUDE "audio/cry_pointers.asm"
 INCLUDE "audio/sfx_pointers.asm"
 
 SECTION "Songs 1", ROMX
-
-include	"audio/music/viridiancity.asm"
-include	"audio/music/credits.asm"
 
 SECTION "Sound Effects", ROMX,bank[1]
 
